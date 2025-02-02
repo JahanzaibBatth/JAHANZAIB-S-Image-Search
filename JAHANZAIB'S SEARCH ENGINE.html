@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAHANZAIB'S GPT - Image Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image:url(https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3MDQzODl8MHwxfHNlYXJjaHwyM3x8YmFja2dyb3VuZCUyMGltYWdlJTIwZm9yJTIwJTIwJTIwc2VhcmNoJTIwZW5naW5lfGVufDB8fHx8MTczODUwNzEwMHww&ixlib=rb-4.0.3&q=85);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        #search-box {
+            width: 60%;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+        }
+        #search-btn, #show-more-btn {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            background: #ff5722;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .image-card {
+            margin: 10px;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+            text-align: center;
+        }
+        .image-card:hover {
+            transform: scale(1.1);
+        }
+        img {
+            width: 300px;
+            height: 200px;
+            border-radius: 10px;
+        }
+        .download-btn {
+            display: block;
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 1rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        #show-more-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>JAHANZAIB'S GPT - Image Search</h1>
+    <input type="text" id="search-box" placeholder="Search for images...">
+    <button id="search-btn">Search</button>
+    <div id="image-container"></div>
+    <button id="show-more-btn">Show More</button>
+    
+    <script>
+        let query = '';
+        let page = 1;
+        const perPage = 12;
+        const accessKey = 'Pp1UKYxwHtQnWfcOpm-ndfFe9lR-PdYlaJ_blOIUO7k';
+
+        function searchImages(reset = true) {
+            if (reset) {
+                page = 1;
+                document.getElementById('image-container').innerHTML = '';
+            }
+            fetch(`https://api.unsplash.com/search/photos?query=${query}&page=${page}&per_page=${perPage}&client_id=${accessKey}`)
+            .then(response => response.json())
+            .then(data => {
+                let container = document.getElementById('image-container');
+                if (!data || !data.results || data.results.length === 0) {
+                    if (reset) container.innerHTML = '<p>No images found. Try a different keyword.</p>';
+                    return;
+                }
+                data.results.forEach(image => {
+                    let imgElement = document.createElement('div');
+                    imgElement.classList.add('image-card');
+                    imgElement.innerHTML = `
+                        <img src="${image.urls.small}" alt="${image.alt_description}">
+                        <a href="${image.urls.full}" download class="download-btn">Download</a>
+                    `;
+                    container.appendChild(imgElement);
+                });
+                document.getElementById('show-more-btn').style.display = 'block';
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Error fetching images. Please try again later.');
+            });
+        }
+
+        document.getElementById('search-btn').addEventListener('click', function() {
+            query = document.getElementById('search-box').value.trim();
+            if (!query) {
+                alert('Please enter a search term!');
+                return;
+            }
+            searchImages();
+        });
+
+        document.getElementById('show-more-btn').addEventListener('click', function() {
+            page++;
+            searchImages(false);
+        });
+    </script>
+</body>
+</html>
